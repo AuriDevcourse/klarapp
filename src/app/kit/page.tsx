@@ -10,13 +10,9 @@ import {
   Users,
   PawPrint,
   Check,
-  ChevronLeft,
-  Settings,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/klar/bottom-nav";
 import { ProgressRing } from "@/components/klar/progress-ring";
-import Link from "next/link";
 
 const iconMap: Record<string, React.ElementType> = {
   Droplets,
@@ -80,35 +76,26 @@ export default function KitPage() {
   return (
     <div className="min-h-dvh bg-klar-bg pb-24">
       {/* Header */}
-      <header className="px-5 pt-14 pb-2">
-        <div className="flex items-center gap-3 mb-4">
-          <Link href="/dashboard" className="p-1 -ml-1">
-            <ChevronLeft size={24} className="text-foreground" />
-          </Link>
-          <h1 className="text-lg font-bold text-foreground">
-            My Emergency Kit
-          </h1>
-        </div>
-      </header>
-
-      {/* Household summary + readiness */}
-      <section className="px-5 mb-4">
+      <header className="bg-klar-primary px-5 pt-14 pb-6 rounded-b-3xl">
+        <h1 className="text-xl font-bold text-white mb-4">
+          My Emergency Kit
+        </h1>
         <motion.div
-          className="bg-white rounded-2xl p-5 shadow-sm border border-border/50 flex items-center gap-5"
+          className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 flex items-center gap-5"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <ProgressRing
             percentage={Math.min(readiness, 100)}
-            size={100}
-            strokeWidth={8}
+            size={90}
+            strokeWidth={7}
             label="ready"
           />
           <div className="flex-1">
-            <h2 className="font-semibold text-foreground mb-2">
+            <h2 className="font-semibold text-white mb-1.5">
               Household
             </h2>
-            <div className="flex gap-4 text-sm text-muted-foreground">
+            <div className="flex gap-4 text-sm text-white/70">
               <div className="flex items-center gap-1">
                 <Users size={14} />
                 <span>2 adults</span>
@@ -118,20 +105,12 @@ export default function KitPage() {
                 <span>0 pets</span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3 rounded-lg text-xs h-8"
-            >
-              <Settings size={12} className="mr-1" />
-              Update household
-            </Button>
           </div>
         </motion.div>
-      </section>
+      </header>
 
       {/* Kit grid */}
-      <section className="px-5">
+      <section className="px-5 mt-4">
         <div className="flex flex-col gap-4">
           {categories.map((cat) => {
             const catItems = defaultKit.filter((i) => i.category === cat);
