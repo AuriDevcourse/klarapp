@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion, type PanInfo } from "framer-motion";
+import { useState, useRef } from "react";
+import { motion, useMotionValue, useAnimation, type PanInfo } from "framer-motion";
 import Link from "next/link";
 import {
   Droplets,
@@ -67,14 +67,26 @@ const lessons = [
 
 export default function LessonsPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const controls = useAnimation();
   const swipeThreshold = 50;
 
+  const snapTo = (index: number) => {
+    const width = containerRef.current?.offsetWidth ?? 0;
+    controls.start({ x: -index * width, transition: { type: "spring", stiffness: 300, damping: 30 } });
+    setCurrentIndex(index);
+  };
+
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const width = containerRef.current?.offsetWidth ?? 0;
+    let newIndex = currentIndex;
     if (info.offset.x < -swipeThreshold && currentIndex < lessons.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      newIndex = currentIndex + 1;
     } else if (info.offset.x > swipeThreshold && currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+      newIndex = currentIndex - 1;
     }
+    snapTo(newIndex);
   };
 
   return (
@@ -93,14 +105,14 @@ export default function LessonsPage() {
 
       {/* Carousel fills remaining space */}
       <div className="flex-1 flex flex-col min-h-0 pb-24">
-        <div className="relative overflow-hidden flex-1">
+        <div ref={containerRef} className="relative overflow-hidden flex-1">
           <motion.div
             className="flex h-full"
-            animate={{ x: `-${currentIndex * 100}%` }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            style={{ x }}
+            animate={controls}
             drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
+            dragConstraints={containerRef}
+            dragElastic={0.15}
             onDragEnd={handleDragEnd}
           >
             {lessons.map((lesson) => (
@@ -117,7 +129,7 @@ export default function LessonsPage() {
             <button
               key={i}
               type="button"
-              onClick={() => setCurrentIndex(i)}
+              onClick={() => snapTo(i)}
               className={`w-2 h-2 rounded-full transition-all ${
                 i === currentIndex
                   ? "bg-klar-primary w-6"
