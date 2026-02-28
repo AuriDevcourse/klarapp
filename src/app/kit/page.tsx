@@ -74,7 +74,7 @@ export default function KitPage() {
   const categories = [...new Set(defaultKit.map((i) => i.category))];
 
   return (
-    <div className="min-h-dvh bg-klar-bg pb-24">
+    <div className="min-h-dvh pb-24">
       {/* Header */}
       <header className="bg-klar-primary px-5 pt-14 pb-6 rounded-b-3xl">
         <h1 className="text-xl font-bold text-white mb-4">
