@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Bot,
   Send,
-  ChevronLeft,
   Sparkles,
   User,
   Droplets,
@@ -16,7 +15,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/klar/bottom-nav";
-import Link from "next/link";
 
 interface Message {
   id: string;
@@ -238,24 +236,13 @@ export default function AgentPage() {
   return (
     <div className="min-h-dvh bg-klar-bg flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-border px-4 pt-12 pb-3">
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="p-1 -ml-1">
-            <ChevronLeft size={24} className="text-foreground" />
-          </Link>
-          <div className="w-9 h-9 rounded-xl bg-klar-primary flex items-center justify-center">
-            <Bot size={20} className="text-white" />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-1.5">
-              <h1 className="text-sm font-bold text-foreground">
-                Emergency Agent
-              </h1>
-              <Sparkles size={12} className="text-klar-accent" />
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              Powered by Claude AI
-            </p>
+      <header className="sticky top-0 z-40 px-4 pt-12 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-xl font-bold text-foreground">
+              Emergency Agent
+            </h1>
+            <Sparkles size={14} className="text-klar-accent" />
           </div>
           <div className="flex items-center gap-1 bg-klar-success/10 px-2 py-1 rounded-full">
             <div className="w-1.5 h-1.5 rounded-full bg-klar-success animate-pulse" />
@@ -367,7 +354,7 @@ export default function AgentPage() {
       </div>
 
       {/* Input */}
-      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-border px-4 py-3">
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 py-3">
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}

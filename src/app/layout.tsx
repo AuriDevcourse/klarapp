@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   description:
     "Get ready for emergencies with Denmark's interactive preparedness app",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/logo/KlariconBlue.svg",
+    apple: "/logo/KlariconBlue.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
