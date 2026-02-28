@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { ScenarioContent } from "@/content/schema";
+import type { ScenarioContent } from "@content/schema";
 
 // ============================================================
 // Claude AI — Personalised emergency scenario generator
@@ -113,19 +113,17 @@ export async function generateScenario(
   // Validate structure
   if (
     !parsed.situation ||
-    !parsed.situationDa ||
     !Array.isArray(parsed.choices) ||
     parsed.choices.length < 2 ||
     parsed.choices.length > 3
   ) {
     throw new Error(
-      "Invalid scenario structure returned from Claude API: expected 2-3 choices with situation and situationDa"
+      "Invalid scenario structure returned from Claude API: expected 2-3 choices with situation"
     );
   }
 
   return {
     ...parsed,
-    type: "scenario",
     aiGenerated: true,
-  };
+  } as ScenarioContent;
 }
