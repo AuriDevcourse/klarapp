@@ -76,12 +76,12 @@ export default function KitPage() {
   return (
     <div className="min-h-dvh pb-24">
       {/* Header */}
-      <header className="bg-klar-primary px-5 pt-14 pb-6 rounded-b-3xl">
-        <h1 className="text-xl font-bold text-white mb-4">
+      <header className="px-5 pt-14 pb-6">
+        <h1 className="text-xl font-bold text-foreground mb-4">
           My Emergency Kit
         </h1>
         <motion.div
-          className="bg-white/15 backdrop-blur-sm rounded-2xl p-4 flex items-center gap-5"
+          className="bg-white rounded-2xl p-4 shadow-sm border border-border/50 flex items-center gap-5"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -92,10 +92,10 @@ export default function KitPage() {
             label="ready"
           />
           <div className="flex-1">
-            <h2 className="font-semibold text-white mb-1.5">
+            <h2 className="font-semibold text-foreground mb-1.5">
               Household
             </h2>
-            <div className="flex gap-4 text-sm text-white/70">
+            <div className="flex gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Users size={14} />
                 <span>2 adults</span>
