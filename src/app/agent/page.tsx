@@ -354,7 +354,7 @@ export default function AgentPage() {
       </div>
 
       {/* Input */}
-      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 py-3">
+      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 py-3">
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}
