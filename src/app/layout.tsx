@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Image from "next/image";
+import { Analytics } from "@vercel/analytics/next";
 import { AgentationProvider } from "@/components/klar/agentation-provider";
 import "./globals.css";
 
@@ -76,6 +77,7 @@ export default function RootLayout({
           </div>
           <div className="relative z-10">{children}</div>
         </div>
+        <Analytics />
         <AgentationProvider />
       </body>
     </html>
