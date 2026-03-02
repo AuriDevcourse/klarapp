@@ -187,54 +187,8 @@ Try asking me about a specific emergency situation, or tap one of the quick prom
 }
 
 export default function AgentPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "agent",
-      content:
-        "Hi! I'm your AI emergency preparedness agent, powered by Claude. I can generate personalized scenarios, assess your readiness, and guide you through emergency protocols based on official Danish guidelines.\n\nWhat would you like to practice?",
-      timestamp: new Date(),
-    },
-  ]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const sendMessage = (text: string) => {
-    if (!text.trim()) return;
-
-    const userMsg: Message = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: text,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    setIsTyping(true);
-
-    // Simulate agent thinking time
-    setTimeout(() => {
-      const response = getAgentResponse(text);
-      const agentMsg: Message = {
-        id: `agent-${Date.now()}`,
-        role: "agent",
-        content: response,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, agentMsg]);
-      setIsTyping(false);
-    }, 1500 + Math.random() * 1000);
-  };
-
   return (
-    <div className="min-h-dvh bg-klar-bg flex flex-col">
+    <div className="min-h-dvh bg-transparent flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-40 px-4 pt-12 pb-3">
         <div className="flex items-center justify-between">
@@ -242,136 +196,67 @@ export default function AgentPage() {
             <h1 className="text-xl font-bold text-foreground">
               Emergency Agent
             </h1>
-            <Sparkles size={14} className="text-klar-accent" />
+            <Sparkles size={14} className="text-muted-foreground/40" />
           </div>
-          <div className="flex items-center gap-1 bg-klar-success/10 px-2 py-1 rounded-full">
-            <div className="w-1.5 h-1.5 rounded-full bg-klar-success animate-pulse" />
-            <span className="text-[10px] font-medium text-klar-success">
-              Online
+          <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded-full">
+            <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40" />
+            <span className="text-[10px] font-medium text-muted-foreground">
+              Offline
             </span>
           </div>
         </div>
       </header>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 pb-48">
-        {/* Quick prompts (show only if just welcome message) */}
-        {messages.length === 1 && (
-          <motion.div
-            className="grid grid-cols-2 gap-2 mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
+      {/* Coming Soon content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-32">
+        <motion.div
+          className="flex flex-col items-center text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+            <Bot size={28} className="text-muted-foreground/50" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground mb-1">
+            Coming Soon
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Your AI emergency preparedness agent is under development. It will generate personalised scenarios, assess your readiness, and guide you through emergency protocols.
+          </p>
+
+          {/* Greyed-out quick prompts preview */}
+          <div className="grid grid-cols-2 gap-2 mt-6 opacity-40 pointer-events-none">
             {quickPrompts.map((qp) => (
-              <button
+              <div
                 key={qp.label}
-                onClick={() => sendMessage(qp.prompt)}
-                className="bg-white rounded-xl p-3 border border-border/50 text-left active:scale-[0.97] transition-transform shadow-sm"
+                className="bg-white rounded-xl p-3 border border-border/50 text-left shadow-sm"
               >
-                <qp.icon
-                  size={20}
-                  style={{ color: qp.color }}
-                  className="mb-2"
-                />
-                <p className="text-xs font-semibold text-foreground">
+                <qp.icon size={20} className="text-muted-foreground/50 mb-2" />
+                <p className="text-xs font-semibold text-muted-foreground">
                   {qp.label}
                 </p>
-              </button>
-            ))}
-          </motion.div>
-        )}
-
-        <div className="flex flex-col gap-4">
-          <AnimatePresence>
-            {messages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex gap-2.5 ${
-                  msg.role === "user" ? "flex-row-reverse" : "flex-row"
-                }`}
-              >
-                {/* Avatar */}
-                <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-1 ${
-                    msg.role === "agent"
-                      ? "bg-klar-primary"
-                      : "bg-muted"
-                  }`}
-                >
-                  {msg.role === "agent" ? (
-                    <Bot size={14} className="text-white" />
-                  ) : (
-                    <User size={14} className="text-muted-foreground" />
-                  )}
-                </div>
-
-                {/* Bubble */}
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                    msg.role === "user"
-                      ? "bg-klar-primary text-white rounded-tr-sm"
-                      : "bg-white border border-border/50 shadow-sm rounded-tl-sm"
-                  }`}
-                >
-                  <MessageContent
-                    text={msg.content}
-                    isUser={msg.role === "user"}
-                  />
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          {/* Typing indicator */}
-          {isTyping && (
-            <motion.div
-              className="flex gap-2.5"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <div className="w-7 h-7 rounded-lg bg-klar-primary flex items-center justify-center shrink-0 mt-1">
-                <Bot size={14} className="text-white" />
               </div>
-              <div className="bg-white border border-border/50 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Loader2
-                    size={14}
-                    className="text-klar-primary animate-spin"
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    Analyzing situation...
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </div>
-
-        <div ref={messagesEndRef} />
+            ))}
+          </div>
+        </motion.div>
       </div>
 
-      {/* Input */}
+      {/* Greyed-out input */}
       <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 py-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 opacity-50 pointer-events-none">
           <input
-            ref={inputRef}
             type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-            placeholder="Describe your emergency situation..."
-            className="flex-1 bg-muted rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-klar-primary/20"
+            disabled
+            placeholder="Coming soon..."
+            className="flex-1 bg-muted rounded-xl px-4 py-2.5 text-sm text-muted-foreground placeholder:text-muted-foreground/60 outline-none cursor-not-allowed"
           />
           <Button
-            onClick={() => sendMessage(input)}
-            disabled={!input.trim() || isTyping}
+            disabled
             size="icon"
-            className="w-10 h-10 rounded-xl bg-klar-primary hover:bg-klar-primary-light shrink-0"
+            className="w-10 h-10 rounded-xl bg-muted shrink-0"
           >
-            <Send size={16} className="text-white" />
+            <Send size={16} className="text-muted-foreground" />
           </Button>
         </div>
       </div>

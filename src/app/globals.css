@@ -102,6 +102,7 @@
   min-height: 100dvh;
   position: relative;
   overflow-x: hidden;
+  background: linear-gradient(180deg, #e8f0fe 0%, #f8fafc 50%, #ffffff 100%);
 }
 
 /* Confetti canvas */
@@ -113,6 +114,11 @@
   height: 100%;
   pointer-events: none;
   z-index: 100;
+}
+
+/* Klar gradient background matching the login page */
+.klar-gradient-bg {
+  background: linear-gradient(180deg, #e8f0fe 0%, #f8fafc 50%, #ffffff 100%);
 }
 
 /* Smooth scrolling */

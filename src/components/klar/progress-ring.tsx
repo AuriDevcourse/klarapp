@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 interface ProgressRingProps {
@@ -17,13 +17,29 @@ export function ProgressRing({
   label,
 }: ProgressRingProps) {
   const [animatedPercent, setAnimatedPercent] = useState(0);
+  const rafRef = useRef<number>(0);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (animatedPercent / 100) * circumference;
 
   useEffect(() => {
-    const timer = setTimeout(() => setAnimatedPercent(percentage), 300);
-    return () => clearTimeout(timer);
+    let current = animatedPercent;
+    const target = percentage;
+    if (current === target) return;
+
+    let lastTime = 0;
+    const tick = (time: number) => {
+      if (time - lastTime >= 15) {
+        lastTime = time;
+        current += current < target ? 1 : -1;
+        setAnimatedPercent(current);
+        if (current === target) return;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [percentage]);
 
   return (

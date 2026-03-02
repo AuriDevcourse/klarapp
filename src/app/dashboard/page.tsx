@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Droplets,
-  Clock,
   ChevronRight,
   Zap,
 } from "lucide-react";
@@ -29,7 +28,7 @@ export default function DashboardPage() {
   const Icon = currentLesson.icon;
 
   return (
-    <div className="min-h-dvh bg-klar-bg pb-24">
+    <div className="min-h-dvh bg-transparent pb-24">
       {/* Header */}
       <motion.header
         className="px-5 pt-14 pb-4"
@@ -44,7 +43,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">
-                Welcome, Arun
+                Welcome, Auri
               </h1>
               <p className="text-sm text-muted-foreground">Get ready for anything</p>
             </div>
@@ -112,13 +111,7 @@ export default function DashboardPage() {
 
             {/* Progress bar */}
             <div className="mt-4">
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-1">
-                  <Clock size={12} className="text-muted-foreground" />
-                  <span className="text-[11px] text-muted-foreground">
-                    {currentLesson.duration} min
-                  </span>
-                </div>
+              <div className="flex items-center justify-end mb-1.5">
                 <span className="text-[11px] text-muted-foreground">
                   {currentLesson.completedSteps}/{currentLesson.totalSteps} steps
                 </span>
@@ -139,6 +132,24 @@ export default function DashboardPage() {
               </div>
             </div>
           </motion.div>
+        </Link>
+      </motion.section>
+
+      {/* Explore other lessons */}
+      <motion.section
+        className="px-5 pt-5"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <Link href="/lessons">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-border/50 flex items-center justify-between active:scale-[0.98] transition-transform">
+            <div>
+              <h3 className="font-semibold text-foreground text-sm">Explore other lessons</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Browse all emergency topics</p>
+            </div>
+            <ChevronRight size={20} className="text-muted-foreground shrink-0" />
+          </div>
         </Link>
       </motion.section>
 

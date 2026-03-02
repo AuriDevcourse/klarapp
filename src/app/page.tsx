@@ -26,25 +26,9 @@ export default function LoginPage() {
       {!isExiting && (
         <motion.div
           className="min-h-dvh flex flex-col items-center justify-center px-6 relative overflow-hidden"
-          style={{
-            background:
-              "linear-gradient(180deg, #e8f0fe 0%, #f8fafc 50%, #ffffff 100%)",
-          }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.4 }}
         >
-          {/* Faded background icon */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Image
-              src="/logo/KlariconBlue.svg"
-              alt=""
-              width={500}
-              height={500}
-              className="opacity-[0.03] select-none"
-              aria-hidden="true"
-            />
-          </div>
-
           {/* Klar branding */}
           <motion.div
             className="mb-10 flex flex-col items-center relative z-10"

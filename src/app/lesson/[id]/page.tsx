@@ -23,14 +23,17 @@ import { getLessonById } from "@/lib/content-loader";
 import cloudMeditateAnim from "@/animations/cloud-meditate.json";
 import floodAlertAnim from "@/animations/flood-alert.json";
 import thumbsUpAnim from "@/animations/thumbs-up.json";
+import supplyChainAnim from "@/animations/supply-chain.json";
+import megaphoneAnim from "@/animations/megaphone.json";
+import powerPlugsAnim from "@/animations/power-plugs.json";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 const categoryAnimations: Record<string, unknown> = {
   floods: floodAlertAnim,
-  "kit-72h": cloudMeditateAnim,
-  sirens: cloudMeditateAnim,
-  blackout: cloudMeditateAnim,
+  "kit-72h": supplyChainAnim,
+  sirens: megaphoneAnim,
+  blackout: powerPlugsAnim,
 };
 import type {
   Lesson,
@@ -84,7 +87,7 @@ export default function LessonPage({
 
   if (isComplete) {
     if (showLeaderboard) {
-      return <LeaderboardScreen onContinue={() => router.push("/lessons")} />;
+      return <LeaderboardScreen lessonScore={score} onContinue={() => router.push("/lessons")} />;
     }
     return (
       <CompletionScreen
@@ -99,10 +102,10 @@ export default function LessonPage({
   }
 
   return (
-    <div className="min-h-dvh bg-klar-bg flex flex-col">
+    <div className="min-h-dvh bg-transparent flex flex-col">
       {/* Top bar */}
-      <div className="sticky top-0 z-40 bg-klar-bg/90 backdrop-blur-md px-4 pt-12 pb-3">
-        <div className="flex items-center gap-3 mb-3">
+      <div className="sticky top-0 z-40 px-4 pt-12 pb-4" style={{ background: "linear-gradient(180deg, #e8f0fe 60%, transparent 100%)" }}>
+        <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/dashboard")}
             className="p-1 -ml-1"
@@ -179,7 +182,7 @@ function LessonIntro({
   const animData = categoryAnimations[lesson.category] ?? cloudMeditateAnim;
 
   return (
-    <div className="min-h-dvh bg-klar-bg flex flex-col">
+    <div className="min-h-dvh bg-transparent flex flex-col">
       {/* Back button */}
       <div className="px-5 pt-14 pb-2">
         <button
@@ -988,7 +991,7 @@ function CompletionScreen({
   }, []);
 
   return (
-    <div className="min-h-dvh bg-klar-bg flex flex-col items-center justify-center px-6">
+    <div className="min-h-dvh bg-transparent flex flex-col items-center justify-center px-6">
       {/* Animated thumbs up */}
       <motion.div
         className="w-48 h-48 mb-2"
@@ -1072,51 +1075,71 @@ function CompletionScreen({
 
 /* ─── Leaderboard Screen ─────────────────────────────────────────── */
 
+const baseScore = 2110;
+
 const leaderboardData = [
   { rank: 1, name: "Sofie M.", score: 2450, avatar: "SM" },
-  { rank: 2, name: "Jonas K.", score: 2120, avatar: "JK" },
-  { rank: 3, name: "Arun P.", score: 1890, avatar: "AP", isYou: true },
+  { rank: 2, name: "Jonas K.", score: 2115, avatar: "JK" },
+  { rank: 3, name: "Auri", score: baseScore, avatar: "AU", isYou: true },
   { rank: 4, name: "Emma L.", score: 1650, avatar: "EL" },
 ];
 
-function LeaderboardScreen({ onContinue }: { onContinue: () => void }) {
+function LeaderboardScreen({ lessonScore, onContinue }: { lessonScore: number; onContinue: () => void }) {
+  const newTotal = baseScore + lessonScore;
+  const [displayTotal, setDisplayTotal] = useState(baseScore);
+  const [showGain, setShowGain] = useState(false);
+
+  useEffect(() => {
+    // Show the "+X pts" badge after a short delay
+    const gainTimer = setTimeout(() => setShowGain(true), 600);
+
+    // Then count up the score
+    const countTimer = setTimeout(() => {
+      let current = baseScore;
+      const interval = setInterval(() => {
+        current += 1;
+        if (current >= newTotal) {
+          current = newTotal;
+          clearInterval(interval);
+        }
+        setDisplayTotal(current);
+      }, 20);
+    }, 1200);
+
+    return () => {
+      clearTimeout(gainTimer);
+      clearTimeout(countTimer);
+    };
+  }, [newTotal]);
+
+  // Recalculate ranks with the new score
+  const updatedBoard = leaderboardData.map((p) =>
+    p.isYou ? { ...p, score: displayTotal } : p
+  );
+  updatedBoard.sort((a, b) => b.score - a.score);
+  updatedBoard.forEach((p, i) => (p.rank = i + 1));
+
   return (
-    <div className="min-h-dvh bg-klar-bg flex flex-col items-center px-6 pt-16">
-      <motion.div
-        className="flex items-center gap-2 mb-2"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <span className="text-3xl">🥉</span>
-        <h1 className="text-2xl font-bold text-foreground">Bronze League</h1>
-      </motion.div>
+    <div className="min-h-dvh bg-transparent flex flex-col items-center px-6 pt-16">
+      <div className="flex items-center gap-2 mb-2">
+        <h1 className="text-2xl font-bold text-foreground">Leaderboard</h1>
+      </div>
 
-      <motion.p
-        className="text-sm text-muted-foreground mb-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        Keep learning to climb the ranks!
-      </motion.p>
+      <p className="text-sm text-muted-foreground mb-6 text-center max-w-xs">
+        Reach the top in your municipality and win rewards
+      </p>
 
-      <motion.div
-        className="w-full max-w-xs flex flex-col gap-3 mb-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        {leaderboardData.map((player, i) => (
+      <div className="w-full max-w-xs flex flex-col gap-3 mb-8">
+        {updatedBoard.map((player) => (
           <motion.div
-            key={player.rank}
+            key={player.name}
             className={`flex items-center gap-3 p-4 rounded-2xl border ${
               player.isYou
                 ? "bg-klar-primary/5 border-klar-primary/30"
                 : "bg-white border-border/50"
             } shadow-sm`}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 + i * 0.1 }}
+            layout
+            transition={{ type: "spring", stiffness: 200, damping: 25 }}
           >
             <span className="text-lg font-bold text-muted-foreground w-6 text-center">
               {player.rank}
@@ -1134,27 +1157,27 @@ function LeaderboardScreen({ onContinue }: { onContinue: () => void }) {
               <p className={`text-sm font-semibold ${player.isYou ? "text-klar-primary" : "text-foreground"}`}>
                 {player.name} {player.isYou && "(You)"}
               </p>
+              {player.isYou && (
+                <p className={`text-[11px] font-bold text-klar-success transition-opacity duration-300 ${showGain && lessonScore > 0 ? "opacity-100" : "opacity-0"}`}>
+                  +{lessonScore} pts
+                </p>
+              )}
             </div>
-            <span className="text-sm font-bold text-muted-foreground">
-              {player.score.toLocaleString()} pts
+            <span className={`text-sm font-bold ${player.isYou ? "text-klar-primary" : "text-muted-foreground"}`}>
+              {player.isYou ? displayTotal.toLocaleString() : player.score.toLocaleString()} pts
             </span>
           </motion.div>
         ))}
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="w-full max-w-xs"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-      >
+      <div className="w-full max-w-xs">
         <Button
           onClick={onContinue}
           className="w-full h-12 rounded-xl text-base font-semibold bg-klar-primary hover:bg-klar-primary-light text-white active:scale-[0.97] transition-transform"
         >
           Continue
         </Button>
-      </motion.div>
+      </div>
     </div>
   );
 }
