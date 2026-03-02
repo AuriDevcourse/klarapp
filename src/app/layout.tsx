@@ -24,7 +24,7 @@ export const metadata: Metadata = {
       "Get ready for emergencies with Denmark's interactive preparedness app",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Klar — Emergency preparedness for everyone",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     title: "Klar — Emergency Preparedness Training",
     description:
       "Get ready for emergencies with Denmark's interactive preparedness app",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
   },
   appleWebApp: {
     capable: true,
