@@ -18,6 +18,28 @@ export const metadata: Metadata = {
     icon: "/logo/icon-192.png",
     apple: "/logo/apple-touch-icon.png",
   },
+  openGraph: {
+    title: "Klar — Emergency Preparedness Training",
+    description:
+      "Get ready for emergencies with Denmark's interactive preparedness app",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Klar — Emergency preparedness for everyone",
+      },
+    ],
+    siteName: "Klar",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Klar — Emergency Preparedness Training",
+    description:
+      "Get ready for emergencies with Denmark's interactive preparedness app",
+    images: ["/og-image.png"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
