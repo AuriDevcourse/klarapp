@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, useMotionValue, useAnimation, type PanInfo } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   Droplets,
   Package,
   AlertTriangle,
   Radio,
-  ChevronLeft,
-  ChevronRight,
+  Check,
+  Lock,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { StatsBar } from "@/components/klar/stats-bar";
 import { BottomNav } from "@/components/klar/bottom-nav";
+import { useGameState } from "@/lib/game-state";
 import diverAnim from "@/animations/diver.json";
 import supplyChainAnim from "@/animations/supply-chain.json";
 import megaphoneAnim from "@/animations/megaphone.json";
@@ -29,33 +30,29 @@ const lessons = [
     iconColor: "#3b82f6",
     iconBg: "#eff6ff",
     duration: 15,
-    totalSteps: 10,
-    completedSteps: 3,
+    xpReward: 50,
     lottie: diverAnim,
   },
   {
     id: "kit-72h-01",
-    title: "72-Hour Emergency Kit",
-    subtitle: "Build your personalized preparedness kit",
+    title: "72-Hour Kit",
+    subtitle: "Build your preparedness kit",
     icon: Package,
     iconColor: "#22c55e",
     iconBg: "#f0fdf4",
     duration: 12,
-    totalSteps: 10,
-    completedSteps: 0,
+    xpReward: 50,
     lottie: supplyChainAnim,
   },
   {
     id: "sirens-01",
     title: "Sirens & Warnings",
-    subtitle: "Understand Denmark's alert systems",
+    subtitle: "Denmark's alert systems",
     icon: AlertTriangle,
     iconColor: "#f59e0b",
     iconBg: "#fffbeb",
     duration: 10,
-    totalSteps: 8,
-    completedSteps: 0,
-    locked: true,
+    xpReward: 40,
     lottie: megaphoneAnim,
   },
   {
@@ -66,143 +63,77 @@ const lessons = [
     iconColor: "#ef4444",
     iconBg: "#fef2f2",
     duration: 12,
-    totalSteps: 8,
-    completedSteps: 0,
-    locked: true,
+    xpReward: 40,
     lottie: powerPlugsAnim,
   },
 ];
 
+type NodeStatus = "completed" | "current" | "locked";
+
+function getNodeStatus(
+  index: number,
+  completedIds: string[]
+): NodeStatus {
+  const lesson = lessons[index];
+  if (completedIds.includes(lesson.id)) return "completed";
+  // First incomplete lesson is current
+  if (index === 0) return "current";
+  if (completedIds.includes(lessons[index - 1].id)) return "current";
+  return "locked";
+}
+
 export default function LessonsPage() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-  const controls = useAnimation();
-  const isAnimating = useRef(false);
-  const swipeThreshold = 50;
-
-  // Slides: [clone of last] [0] [1] [2] [3] [clone of first]
-  // Real index 0 sits at offset 1
-  const slides = [
-    lessons[lessons.length - 1],
-    ...lessons,
-    lessons[0],
-  ];
-
-  const getX = (slideOffset: number) => {
-    const width = containerRef.current?.offsetWidth ?? 0;
-    return -slideOffset * width;
-  };
-
-  const goTo = async (newIndex: number) => {
-    if (isAnimating.current) return;
-    isAnimating.current = true;
-
-    const slideOffset = newIndex + 1; // +1 because of prepended clone
-    await controls.start({
-      x: getX(slideOffset),
-      transition: { type: "spring", stiffness: 300, damping: 30 },
-    });
-
-    // If we landed on a clone, silently reset to the real slide
-    const wrapped = ((newIndex % lessons.length) + lessons.length) % lessons.length;
-    if (wrapped !== newIndex) {
-      controls.set({ x: getX(wrapped + 1) });
-    }
-    setCurrentIndex(wrapped);
-    isAnimating.current = false;
-  };
-
-  const goNext = () => goTo(currentIndex + 1);
-  const goPrev = () => goTo(currentIndex - 1);
-
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.x < -swipeThreshold) {
-      goNext();
-    } else if (info.offset.x > swipeThreshold) {
-      goPrev();
-    } else {
-      // snap back
-      controls.start({
-        x: getX(currentIndex + 1),
-        transition: { type: "spring", stiffness: 300, damping: 30 },
-      });
-    }
-  };
-
-  // Set initial position to offset 1 (skip the prepended clone)
-  useEffect(() => {
-    controls.set({ x: getX(1) });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { state } = useGameState();
 
   return (
-    <div className="h-dvh bg-transparent flex flex-col">
+    <div className="min-h-dvh bg-transparent pb-24">
+      <StatsBar />
+
       <motion.header
-        className="px-5 pt-14 pb-2 shrink-0"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        className="px-5 pb-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
       >
-        <h1 className="text-xl font-bold text-foreground">Lessons</h1>
+        <h1 className="text-xl font-bold text-foreground">Learning Path</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Swipe to explore all topics
+          Complete lessons to level up
         </p>
       </motion.header>
 
-      {/* Carousel fills remaining space */}
-      <div className="flex-1 flex flex-col min-h-0 pb-24">
-        <div ref={containerRef} className="relative overflow-hidden flex-1">
-          <motion.div
-            className="flex h-full"
-            style={{ x }}
-            animate={controls}
-            drag="x"
-            dragConstraints={containerRef}
-            dragElastic={0.15}
-            onDragEnd={handleDragEnd}
-          >
-            {slides.map((lesson, i) => (
-              <div key={`${lesson.id}-${i}`} className="w-full shrink-0 px-5 h-full">
-                <LessonCard lesson={lesson} />
+      {/* Vertical path */}
+      <div className="px-5 pb-8">
+        {lessons.map((lesson, i) => {
+          const status = getNodeStatus(i, state.lessonsCompleted);
+          const isLast = i === lessons.length - 1;
+
+          return (
+            <motion.div
+              key={lesson.id}
+              className="flex gap-4"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: 0.05 + i * 0.05 }}
+            >
+              {/* Node column: circle + line */}
+              <div className="flex flex-col items-center shrink-0">
+                <PathNode
+                  status={status}
+                  icon={lesson.icon}
+                  iconColor={lesson.iconColor}
+                />
+                {!isLast && (
+                  <div className="w-0.5 flex-1 min-h-4 bg-border" />
+                )}
               </div>
-            ))}
-          </motion.div>
 
-          {/* Left chevron */}
-          <button
-            type="button"
-            onClick={goPrev}
-            className="absolute left-7 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md border border-border/50 flex items-center justify-center active:scale-90 transition-transform z-10"
-          >
-            <ChevronLeft size={18} className="text-foreground" />
-          </button>
-
-          {/* Right chevron */}
-          <button
-            type="button"
-            onClick={goNext}
-            className="absolute right-7 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md border border-border/50 flex items-center justify-center active:scale-90 transition-transform z-10"
-          >
-            <ChevronRight size={18} className="text-foreground" />
-          </button>
-        </div>
-
-        {/* Pagination dots */}
-        <div className="flex justify-center gap-2 pt-4 shrink-0">
-          {lessons.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                i === currentIndex
-                  ? "bg-klar-primary w-6"
-                  : "bg-border"
-              }`}
-            />
-          ))}
-        </div>
+              {/* Info card */}
+              <div className="flex-1 pb-3">
+                <LessonCard lesson={lesson} status={status} />
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       <BottomNav />
@@ -210,84 +141,99 @@ export default function LessonsPage() {
   );
 }
 
-function LessonCard({ lesson }: { lesson: (typeof lessons)[number] }) {
-  const Icon = lesson.icon;
-  const isLocked = "locked" in lesson && lesson.locked;
-
-  if (isLocked) {
-    const hasLottie = "lottie" in lesson && lesson.lottie;
+function PathNode({
+  status,
+  icon: Icon,
+  iconColor,
+}: {
+  status: NodeStatus;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  iconColor: string;
+}) {
+  if (status === "completed") {
     return (
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/50 flex flex-col items-center justify-center text-center h-full opacity-60">
-        {hasLottie ? (
-          <div className="w-[50%] aspect-square mb-4">
-            <Lottie animationData={lesson.lottie} loop autoplay />
-          </div>
-        ) : (
-          <div
-            className="w-20 h-20 rounded-xl flex items-center justify-center mb-4"
-            style={{ backgroundColor: lesson.iconBg }}
-          >
-            <Icon size={36} style={{ color: lesson.iconColor }} />
-          </div>
-        )}
-        <h3 className="text-lg font-semibold text-foreground">
-          {lesson.title}
-        </h3>
-        <span className="text-sm text-muted-foreground mt-1">Coming soon</span>
+      <div className="w-14 h-14 rounded-full bg-klar-success flex items-center justify-center shrink-0 shadow-md">
+        <Check size={24} className="text-white" />
       </div>
     );
   }
 
-  const hasLottie = "lottie" in lesson && lesson.lottie;
+  if (status === "current") {
+    return (
+      <div className="w-14 h-14 rounded-full bg-klar-primary flex items-center justify-center shrink-0 shadow-lg">
+        <Icon size={24} className="text-white" />
+      </div>
+    );
+  }
 
-  const progress = Math.round((lesson.completedSteps / lesson.totalSteps) * 100);
-
+  // locked
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/50 flex flex-col items-center text-center h-full">
-      {/* Title at top */}
-      <h3 className="text-xl font-bold text-foreground shrink-0">
-        {lesson.title}
-      </h3>
-      <p className="text-sm text-muted-foreground mt-1 shrink-0">
-        {lesson.subtitle}
-      </p>
-
-      {/* Icon/Lottie centered, taking ~40% of space */}
-      <div className="flex-1 flex items-center justify-center">
-        {hasLottie ? (
-          <div className="w-[60%] aspect-square">
-            <Lottie animationData={lesson.lottie} loop autoplay />
-          </div>
-        ) : (
-          <div
-            className="w-24 h-24 rounded-2xl flex items-center justify-center"
-            style={{ backgroundColor: lesson.iconBg }}
-          >
-            <Icon size={48} style={{ color: lesson.iconColor }} />
-          </div>
-        )}
-      </div>
-
-      {/* Progress bar */}
-      <div className="w-full shrink-0 mb-4">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs text-muted-foreground">Progress</span>
-          <span className="text-xs font-medium text-foreground">{progress}%</span>
-        </div>
-        <div className="w-full h-2 bg-border/50 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-klar-primary rounded-full transition-all"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Continue button pinned to bottom */}
-      <Link href={`/lesson/${lesson.id}`} className="w-full shrink-0">
-        <div className="w-full h-12 rounded-xl bg-klar-primary flex items-center justify-center active:scale-[0.97] transition-transform">
-          <span className="text-white font-semibold">Continue</span>
-        </div>
-      </Link>
+    <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center shrink-0 opacity-50">
+      <Lock size={20} className="text-muted-foreground" />
     </div>
   );
+}
+
+function LessonCard({
+  lesson,
+  status,
+}: {
+  lesson: (typeof lessons)[number];
+  status: NodeStatus;
+}) {
+  const isLocked = status === "locked";
+  const isCompleted = status === "completed";
+
+  const card = (
+    <motion.div
+      className={`flex-1 bg-white rounded-xl p-4 shadow-sm border border-border/50 ${
+        isLocked ? "opacity-50" : ""
+      } ${!isLocked ? "active:scale-[0.98]" : ""}`}
+      whileTap={!isLocked ? { scale: 0.98 } : undefined}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-foreground text-sm">
+              {lesson.title}
+            </h3>
+            {!isLocked && (
+              <span className="text-[9px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                +{lesson.xpReward} XP
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {lesson.subtitle}
+          </p>
+          <div className="flex items-center gap-2 mt-2">
+            {isCompleted && (
+              <span className="text-[10px] font-semibold text-klar-success bg-green-50 px-2 py-0.5 rounded-full">
+                Completed
+              </span>
+            )}
+            {status === "current" && (
+              <span className="text-[10px] font-semibold text-klar-primary bg-blue-50 px-2 py-0.5 rounded-full">
+                Start
+              </span>
+            )}
+            {isLocked && (
+              <span className="text-[10px] text-muted-foreground">
+                Coming soon
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Small Lottie decoration */}
+        <div className="w-12 h-12 shrink-0 ml-2">
+          <Lottie animationData={lesson.lottie} loop autoplay />
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  if (isLocked) return card;
+
+  return <Link href={`/lesson/${lesson.id}`} className="flex-1">{card}</Link>;
 }

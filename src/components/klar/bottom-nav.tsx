@@ -2,8 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { House, BookOpen, Package, Bot } from "lucide-react";
+import { House, BookOpen, Package, Bot, Flame } from "lucide-react";
 import { motion } from "framer-motion";
+import { useGameState } from "@/lib/game-state";
 
 const tabs = [
   { id: "home", href: "/dashboard", icon: House, label: "Home", match: "/dashboard" },
@@ -22,6 +23,7 @@ function getActiveId(pathname: string): string {
 export function BottomNav() {
   const pathname = usePathname();
   const activeId = getActiveId(pathname);
+  const { state } = useGameState();
 
   return (
     <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 w-full max-w-[430px]">
@@ -32,14 +34,19 @@ export function BottomNav() {
             <Link
               key={tab.id}
               href={tab.href}
-              className="relative flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-all"
+              className="relative flex flex-col items-center gap-0.5 px-5 py-2 rounded-xl transition-all"
             >
               {isActive && (
                 <motion.div
                   layoutId="nav-pill"
-                  className="absolute inset-0 bg-klar-primary rounded-xl"
+                  className="absolute -inset-0.5 bg-klar-primary rounded-xl"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
+              )}
+              {tab.id === "home" && state.streak > 0 && !isActive && (
+                <div className="absolute -top-1 -right-1 z-20 w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center">
+                  <Flame size={10} className="text-white fill-white" />
+                </div>
               )}
               <tab.icon
                 size={20}

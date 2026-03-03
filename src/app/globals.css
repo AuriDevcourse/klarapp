@@ -47,12 +47,12 @@
   --radius-4xl: calc(var(--radius) + 16px);
 
   /* Klar custom colors */
-  --color-klar-primary: #1e3a5f;
-  --color-klar-primary-light: #2a4f7f;
+  --color-klar-primary: #2563eb;
+  --color-klar-primary-light: #3b82f6;
   --color-klar-success: #22c55e;
   --color-klar-warning: #f59e0b;
   --color-klar-danger: #ef4444;
-  --color-klar-accent: #facc15;
+  --color-klar-accent: #f59e0b;
   --color-klar-bg: #f8fafc;
   --color-klar-card: #ffffff;
 }
@@ -65,19 +65,19 @@
   --card-foreground: #1e293b;
   --popover: #ffffff;
   --popover-foreground: #1e293b;
-  --primary: #1e3a5f;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
   --secondary: #f1f5f9;
-  --secondary-foreground: #1e3a5f;
+  --secondary-foreground: #2563eb;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #facc15;
+  --accent: #f59e0b;
   --accent-foreground: #1e293b;
   --destructive: #ef4444;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #1e3a5f;
-  --chart-1: #1e3a5f;
+  --ring: #2563eb;
+  --chart-1: #2563eb;
   --chart-2: #22c55e;
   --chart-3: #f59e0b;
   --chart-4: #ef4444;
@@ -102,7 +102,7 @@
   min-height: 100dvh;
   position: relative;
   overflow-x: hidden;
-  background: linear-gradient(180deg, #e8f0fe 0%, #f8fafc 50%, #ffffff 100%);
+  background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 40%, #ffffff 100%);
 }
 
 /* Confetti canvas */
@@ -118,7 +118,7 @@
 
 /* Klar gradient background matching the login page */
 .klar-gradient-bg {
-  background: linear-gradient(180deg, #e8f0fe 0%, #f8fafc 50%, #ffffff 100%);
+  background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 40%, #ffffff 100%);
 }
 
 /* Smooth scrolling */
@@ -148,4 +148,16 @@ html {
   transition: stroke-dashoffset 1s ease-in-out;
   transform: rotate(-90deg);
   transform-origin: 50% 50%;
+}
+
+/* Button shimmer pulse — light sweep every 5s */
+@keyframes shimmer-sweep {
+  0%, 80% { transform: translateX(-100%); }
+  90% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer-btn {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%);
+  animation: shimmer-sweep 5s ease-in-out infinite;
 }

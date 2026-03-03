@@ -20,6 +20,7 @@ import dynamic from "next/dynamic";
 import { useConfetti } from "@/hooks/use-confetti";
 import { useCorrectSound, useIncorrectSound } from "@/hooks/use-sound";
 import { getLessonById } from "@/lib/content-loader";
+import { useGameState, getLevelProgress, getLevel } from "@/lib/game-state";
 import cloudMeditateAnim from "@/animations/cloud-meditate.json";
 import floodAlertAnim from "@/animations/flood-alert.json";
 import thumbsUpAnim from "@/animations/thumbs-up.json";
@@ -58,6 +59,7 @@ export default function LessonPage({
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  const [hasEnteredFirst, setHasEnteredFirst] = useState(false);
 
   if (!lesson) {
     return (
@@ -94,6 +96,7 @@ export default function LessonPage({
         score={score}
         totalSteps={lesson.steps.length}
         lessonTitle={lesson.title}
+        lessonId={id}
         correctAnswers={correctAnswers}
         totalQuestions={totalQuestions}
         onContinue={() => setShowLeaderboard(true)}
@@ -102,9 +105,14 @@ export default function LessonPage({
   }
 
   return (
-    <div className="min-h-dvh bg-transparent flex flex-col">
+    <motion.div
+      className="min-h-dvh bg-transparent flex flex-col"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       {/* Top bar */}
-      <div className="sticky top-0 z-40 px-4 pt-12 pb-4" style={{ background: "linear-gradient(180deg, #e8f0fe 60%, transparent 100%)" }}>
+      <div className="sticky top-0 z-40 px-4 pt-12 pb-4" style={{ background: "linear-gradient(180deg, #eff6ff 60%, transparent 100%)" }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/dashboard")}
@@ -132,10 +140,11 @@ export default function LessonPage({
         <AnimatePresence mode="wait">
           <motion.div
             key={step.id}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={!hasEnteredFirst ? { opacity: 0, scale: 0.95 } : { opacity: 0, x: 40 }}
+            animate={!hasEnteredFirst ? { opacity: 1, scale: 1 } : { opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}
             transition={{ duration: 0.3 }}
+            onAnimationComplete={() => { if (!hasEnteredFirst) setHasEnteredFirst(true); }}
           >
             {step.type === "info" && (
               <InfoStep
@@ -164,7 +173,7 @@ export default function LessonPage({
           </motion.div>
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -474,10 +483,18 @@ function QuizStep({
                 <div className="w-10 h-10 rounded-full bg-klar-success/20 flex items-center justify-center">
                   <Check size={20} className="text-klar-success" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="font-bold text-klar-success">Correct!</p>
                   <p className="text-xs text-muted-foreground">+10 points</p>
                 </div>
+                <motion.span
+                  className="text-amber-500 font-bold text-sm"
+                  initial={{ opacity: 1, y: 0 }}
+                  animate={{ opacity: 0, y: -24 }}
+                  transition={{ duration: 1.5, delay: 0.5 }}
+                >
+                  +10 XP
+                </motion.span>
               </>
             ) : (
               <>
@@ -960,6 +977,7 @@ function CompletionScreen({
   score,
   totalSteps,
   lessonTitle,
+  lessonId,
   correctAnswers,
   totalQuestions,
   onContinue,
@@ -967,17 +985,25 @@ function CompletionScreen({
   score: number;
   totalSteps: number;
   lessonTitle: string;
+  lessonId?: string;
   correctAnswers: number;
   totalQuestions: number;
   onContinue: () => void;
 }) {
   const { fire: fireConfetti } = useConfetti();
   const { play: playCorrect } = useCorrectSound();
+  const { state, completeLesson } = useGameState();
   const [displayScore, setDisplayScore] = useState(0);
+  const xpEarned = Math.max(10, score);
+  const levelProgress = getLevelProgress(state.xp);
+  const level = getLevel(state.xp);
 
   useEffect(() => {
     playCorrect();
     fireConfetti();
+    if (lessonId) {
+      completeLesson(lessonId, xpEarned);
+    }
     const interval = setInterval(() => {
       setDisplayScore((prev) => {
         if (prev >= score) {
@@ -1046,12 +1072,26 @@ function CompletionScreen({
 
         <div className="pt-3 border-t border-border">
           <motion.div
-            className="flex items-center justify-center gap-2"
+            className="flex flex-col items-center gap-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2 }}
           >
-            <span className="text-klar-accent text-lg font-semibold">+50 XP</span>
+            <span className="text-amber-500 text-lg font-bold">+{xpEarned} XP</span>
+            <div className="w-full">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-muted-foreground">{level.name}</span>
+                <span className="text-[10px] text-muted-foreground">{levelProgress}%</span>
+              </div>
+              <div className="w-full h-2 bg-border/50 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-klar-primary rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: `${levelProgress}%` }}
+                  transition={{ duration: 1, delay: 1.5 }}
+                />
+              </div>
+            </div>
           </motion.div>
         </div>
       </motion.div>
@@ -1066,7 +1106,7 @@ function CompletionScreen({
           onClick={onContinue}
           className="w-full h-12 rounded-xl text-base font-semibold bg-klar-primary hover:bg-klar-primary-light text-white active:scale-[0.97] transition-transform"
         >
-          Next lesson
+          Collect XP & Continue
         </Button>
       </motion.div>
     </div>

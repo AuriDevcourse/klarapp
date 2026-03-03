@@ -60,17 +60,17 @@ export function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#1e3a5f"
+          stroke="#2563eb"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 1.2s ease-in-out" }}
         />
       </svg>
       <div className="absolute flex flex-col items-center">
         <motion.span
-          className="text-3xl font-bold text-klar-primary"
+          className="font-bold text-klar-primary"
+          style={{ fontSize: Math.max(10, size * 0.18) }}
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
@@ -78,7 +78,7 @@ export function ProgressRing({
           {animatedPercent}%
         </motion.span>
         {label && (
-          <span className="text-xs text-muted-foreground mt-0.5">{label}</span>
+          <span className="text-muted-foreground" style={{ fontSize: Math.max(8, size * 0.08), marginTop: 2 }}>{label}</span>
         )}
       </div>
     </div>

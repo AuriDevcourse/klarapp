@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Image from "next/image";
 import { Analytics } from "@vercel/analytics/next";
 import { AgentationProvider } from "@/components/klar/agentation-provider";
+import { GameStateProvider } from "@/lib/game-state";
 import "./globals.css";
 
 const inter = Inter({
@@ -53,7 +54,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#1e3a5f",
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({
@@ -75,7 +76,9 @@ export default function RootLayout({
               aria-hidden="true"
             />
           </div>
-          <div className="relative z-10">{children}</div>
+          <GameStateProvider>
+            <div className="relative z-10">{children}</div>
+          </GameStateProvider>
         </div>
         <Analytics />
         <AgentationProvider />
